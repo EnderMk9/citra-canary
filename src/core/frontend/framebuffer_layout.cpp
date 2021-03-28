@@ -222,62 +222,17 @@ FramebufferLayout SideFrameLayout(u32 width, u32 height, bool swapped, bool upri
     ASSERT(width > 0);
     ASSERT(height > 0);
 
-    FramebufferLayout res{width, height, true, true, {}, {}, !upright};
-    // Split the window into two parts. Give 4x width to the main screen and 1x width to the small
-    // To do that, find the total emulation box and maximize that based on window size
-    float window_aspect_ratio = static_cast<float>(height) / width;
-    float emulation_aspect_ratio;
-    float large_screen_aspect_ratio;
-    float small_screen_aspect_ratio;
-    if (upright) {
-        if (swapped) {
-            emulation_aspect_ratio = (Core::kScreenBottomWidth * 4.0f + Core::kScreenTopWidth) /
-                                     (Core::kScreenBottomHeight * 4);
-            large_screen_aspect_ratio = BOT_SCREEN_UPRIGHT_ASPECT_RATIO;
-            small_screen_aspect_ratio = TOP_SCREEN_UPRIGHT_ASPECT_RATIO;
-        } else {
-            emulation_aspect_ratio = (Core::kScreenTopWidth * 4.0f + Core::kScreenBottomWidth) /
-                                     (Core::kScreenTopHeight * 4);
-            large_screen_aspect_ratio = TOP_SCREEN_UPRIGHT_ASPECT_RATIO;
-            small_screen_aspect_ratio = BOT_SCREEN_UPRIGHT_ASPECT_RATIO;
-        }
-    } else {
-        if (swapped) {
-            emulation_aspect_ratio = Core::kScreenBottomHeight * 4 /
-                                     (Core::kScreenBottomWidth * 4.0f + Core::kScreenTopWidth);
-            large_screen_aspect_ratio = BOT_SCREEN_ASPECT_RATIO;
-            small_screen_aspect_ratio = TOP_SCREEN_ASPECT_RATIO;
-        } else {
-            emulation_aspect_ratio = Core::kScreenTopHeight * 4 /
-                                     (Core::kScreenTopWidth * 4.0f + Core::kScreenBottomWidth);
-            large_screen_aspect_ratio = TOP_SCREEN_ASPECT_RATIO;
-            small_screen_aspect_ratio = BOT_SCREEN_ASPECT_RATIO;
-        }
-    }
+        FramebufferLayout res{width, height, true, true, {}, {}, !Settings::values.upright_screen};
 
-    Common::Rectangle<u32> screen_window_area{0, 0, width, height};
-    Common::Rectangle<u32> total_rect = maxRectangle(screen_window_area, emulation_aspect_ratio);
-    Common::Rectangle<u32> large_screen = maxRectangle(total_rect, large_screen_aspect_ratio);
-    Common::Rectangle<u32> fourth_size_rect = total_rect.Scale(.25f);
-    Common::Rectangle<u32> small_screen = maxRectangle(fourth_size_rect, small_screen_aspect_ratio);
+    Common::Rectangle<u32> top_screen{
+        Settings::values.custom_top_left, Settings::values.custom_top_top,
+        Settings::values.custom_top_right, Settings::values.custom_top_bottom};
+    Common::Rectangle<u32> bot_screen{
+        Settings::values.custom_bottom_left, Settings::values.custom_bottom_top,
+        Settings::values.custom_bottom_right, Settings::values.custom_bottom_bottom};
 
-    if (window_aspect_ratio < emulation_aspect_ratio) {
-        large_screen = large_screen.TranslateX((width - total_rect.GetWidth()) / 2);
-    } else {
-        large_screen = large_screen.TranslateY((height - total_rect.GetHeight()) / 2);
-    }
-    if (upright) {
-        large_screen = large_screen.TranslateY(small_screen.GetHeight());
-        small_screen = small_screen.TranslateX(large_screen.right - small_screen.GetWidth())
-                           .TranslateY(large_screen.top - small_screen.GetHeight());
-    } else {
-        // Shift the small screen to the bottom right corner
-        small_screen =
-            small_screen.TranslateX(large_screen.right)
-                .TranslateY(large_screen.GetHeight() + large_screen.top - small_screen.GetHeight());
-    }
-    res.top_screen = swapped ? small_screen : large_screen;
-    res.bottom_screen = swapped ? large_screen : small_screen;
+    res.top_screen = top_screen;
+    res.bottom_screen = bot_screen;
     return res;
 }
 
@@ -288,11 +243,11 @@ FramebufferLayout CustomFrameLayout(u32 width, u32 height) {
     FramebufferLayout res{width, height, true, true, {}, {}, !Settings::values.upright_screen};
 
     Common::Rectangle<u32> top_screen{
-        Settings::values.custom_top_left, Settings::values.custom_top_top,
-        Settings::values.custom_top_right, Settings::values.custom_top_bottom};
+        0, 0,
+        1800, 1080};
     Common::Rectangle<u32> bot_screen{
-        Settings::values.custom_bottom_left, Settings::values.custom_bottom_top,
-        Settings::values.custom_bottom_right, Settings::values.custom_bottom_bottom};
+        1560, 810,
+        1920, 1080};
 
     res.top_screen = top_screen;
     res.bottom_screen = bot_screen;
