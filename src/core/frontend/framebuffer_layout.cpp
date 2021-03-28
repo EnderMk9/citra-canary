@@ -222,14 +222,15 @@ FramebufferLayout SideFrameLayout(u32 width, u32 height, bool swapped, bool upri
     ASSERT(width > 0);
     ASSERT(height > 0);
 
-        FramebufferLayout res{width, height, true, true, {}, {}, !Settings::values.upright_screen};
+
+    FramebufferLayout res{width, height, true, true, {}, {}, !Settings::values.upright_screen};
 
     Common::Rectangle<u32> top_screen{
-        Settings::values.custom_top_left, Settings::values.custom_top_top,
-        Settings::values.custom_top_right, Settings::values.custom_top_bottom};
+        0, 0,
+        1800, 1080};
     Common::Rectangle<u32> bot_screen{
-        Settings::values.custom_bottom_left, Settings::values.custom_bottom_top,
-        Settings::values.custom_bottom_right, Settings::values.custom_bottom_bottom};
+        1560, 810,
+        1920, 1080};
 
     res.top_screen = top_screen;
     res.bottom_screen = bot_screen;
@@ -243,11 +244,11 @@ FramebufferLayout CustomFrameLayout(u32 width, u32 height) {
     FramebufferLayout res{width, height, true, true, {}, {}, !Settings::values.upright_screen};
 
     Common::Rectangle<u32> top_screen{
-        0, 0,
-        1800, 1080};
+        Settings::values.custom_top_left, Settings::values.custom_top_top,
+        Settings::values.custom_top_right, Settings::values.custom_top_bottom};
     Common::Rectangle<u32> bot_screen{
-        1560, 810,
-        1920, 1080};
+        Settings::values.custom_bottom_left, Settings::values.custom_bottom_top,
+        Settings::values.custom_bottom_right, Settings::values.custom_bottom_bottom};
 
     res.top_screen = top_screen;
     res.bottom_screen = bot_screen;
